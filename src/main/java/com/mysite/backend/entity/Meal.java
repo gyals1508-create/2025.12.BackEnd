@@ -2,18 +2,24 @@ package com.mysite.backend.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.time.LocalDate; // 날짜 전용 타입
 import java.time.LocalDateTime;
 
-@Entity // DB 테이블과 매핑됨
-@Getter @Setter // 게터/세터 자동 생성
+@Entity
+@Getter @Setter
+@Table(name = "meal")
 public class Meal {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String menuName; // 식단 메뉴 이름
+    // DB에는 'menu_name'으로 저장되고, 리액트와는 'text'로 통신함
+    @Column(name = "menu_name")
+    private String text;
 
-    private LocalDateTime createdAt = LocalDateTime.now(); // 생성 시간
+    // 아까 SQL로 추가한 컬럼들 연결
+    private String mealType; // 아침, 점심...
+    private LocalDate mealDate; // 2025-12-30
 
-    // 친구들용 주석: 이 클래스가 있어야 Repository에서 에러가 안 나!
+    private LocalDateTime createdAt = LocalDateTime.now();
 }
