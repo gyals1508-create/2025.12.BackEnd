@@ -6,8 +6,8 @@ import java.time.LocalDate;
 
 @Entity
 @Getter @Setter
-@Table(name = "shopping_item")
-public class ShoppingItem {
+@Table(name = "cart") // ★ 테이블 이름을 cart로 연결
+public class Cart {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

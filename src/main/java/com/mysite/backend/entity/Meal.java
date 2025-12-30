@@ -2,24 +2,36 @@ package com.mysite.backend.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDate; // 날짜 전용 타입
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Getter @Setter
+@Getter
+@Setter
+@NoArgsConstructor // JPA를 위한 기본 생성자
 @Table(name = "meal")
 public class Meal {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // DB에는 'menu_name'으로 저장되고, 리액트와는 'text'로 통신함
-    @Column(name = "menu_name")
+    // 리액트의 'text' 속성을 DB의 'menu_name' 컬럼에 매핑
+    @Column(name = "menu_name", nullable = false)
     private String text;
 
-    // 아까 SQL로 추가한 컬럼들 연결
-    private String mealType; // 아침, 점심...
-    private LocalDate mealDate; // 2025-12-30
+    @Column(name = "meal_type")
+    private String mealType;
 
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @Column(name = "meal_date")
+    private LocalDate mealDate;
+
+    // 생성 시각 자동 기록 (수정 불가 설정)
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    // 데이터가 처음 저장(Insert)되기 직전에 실행됨
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+    }
 }
