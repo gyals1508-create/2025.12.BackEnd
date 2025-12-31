@@ -2,24 +2,41 @@ package com.mysite.backend.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDate; // 날짜 전용 타입
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Getter @Setter
+@Getter
+@Setter
+@NoArgsConstructor
 @Table(name = "meal")
 public class Meal {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // DB에는 'menu_name'으로 저장되고, 리액트와는 'text'로 통신함
-    @Column(name = "menu_name")
+    @Column(name = "menu_name", length = 30, nullable = false)
     private String text;
 
-    // 아까 SQL로 추가한 컬럼들 연결
-    private String mealType; // 아침, 점심...
-    private LocalDate mealDate; // 2025-12-30
+    @Column(name = "meal_type", length = 20)
+    private String mealType;
 
-    private LocalDateTime createdAt = LocalDateTime.now();
+    // ★ 칼로리 필드 추가
+    @Column(name = "calories")
+    private Integer calories;
+
+    @Column(name = "meal_date")
+    private LocalDate mealDate;
+
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+        // 칼로리 값이 없으면 0으로 기본 세팅
+        if (this.calories == null) {
+            this.calories = 0;
+        }
+    }
 }

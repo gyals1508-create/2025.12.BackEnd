@@ -15,13 +15,22 @@ public class MealController {
     private final MealRepository mealRepository;
 
     @GetMapping
-    // 리액트에서 ?date=2025-12-30 이렇게 보내면 그걸 받아서 조회함
     public List<Meal> getList(@RequestParam LocalDate date) {
         return mealRepository.findAllByMealDate(date);
     }
 
     @PostMapping
     public Meal create(@RequestBody Meal meal) {
+        return mealRepository.save(meal);
+    }
+
+    @PutMapping("/{id}")
+    public Meal update(@PathVariable Long id, @RequestBody Meal mealDetails) {
+        Meal meal = mealRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("해당 기록을 찾을 수 없습니다."));
+
+        meal.setText(mealDetails.getText());
+        meal.setCalories(mealDetails.getCalories()); // 칼로리 수정 반영
         return mealRepository.save(meal);
     }
 

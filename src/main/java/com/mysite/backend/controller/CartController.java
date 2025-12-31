@@ -26,8 +26,11 @@ public class CartController {
 
     @PutMapping("/{id}")
     public Cart update(@PathVariable Long id, @RequestBody Cart item) {
-        item.setId(id);
-        return repository.save(item);
+        // 기존 데이터를 먼저 찾아서 필요한 부분(isBought)만 수정하는 게 안전해
+        return repository.findById(id).map(existingItem -> {
+            existingItem.setIsBought(item.getIsBought());
+            return repository.save(existingItem);
+        }).orElseThrow();
     }
 
     @DeleteMapping("/{id}")

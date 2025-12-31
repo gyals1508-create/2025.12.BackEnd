@@ -5,14 +5,23 @@ import lombok.*;
 import java.time.LocalDate;
 
 @Entity
-@Getter @Setter
-@Table(name = "cart") // ★ 테이블 이름을 cart로 연결
+@Getter 
+@Setter
+@NoArgsConstructor
+@Table(name = "cart")
 public class Cart {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String text;          // 물건 이름
-    private Boolean isBought;     // 구매 완료 여부
-    private LocalDate shoppingDate; // 장보는 날짜
+    // 팀원 의견 반영: 길이를 30으로 제한하고 필수값 설정
+    @Column(length = 30, nullable = false)
+    private String text;
+
+    // 버그 방지: 기본값을 false로 설정하여 null 포인트 에러 차단
+    @Column(nullable = false)
+    private Boolean isBought = false;
+
+    @Column(name = "shopping_date")
+    private LocalDate shoppingDate;
 }
