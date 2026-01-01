@@ -10,17 +10,12 @@ import java.util.List;
 
 @Repository
 public interface CartRepository extends JpaRepository<Cart, Long> {
-
     List<Cart> findAllByShoppingDate(LocalDate shoppingDate);
-
     List<Cart> findByTextContaining(String text);
-
-    // 수정: 특정 이름을 가진 항목 중 하나라도 즐겨찾기(true)인 것이 있는지 확인용
     boolean existsByTextAndIsFavoriteTrue(String text);
-
-    // 수정: 특정 이름을 가진 모든 항목의 즐겨찾기 상태를 한꺼번에 변경하기 위함
     List<Cart> findAllByText(String text);
 
+    // [필수] 이 메서드가 있어야 컨트롤러 에러가 사라져!
     @Query("SELECT c FROM Cart c WHERE c.shoppingDate = :shoppingDate OR c.isFavorite = true")
     List<Cart> findAllByShoppingDateOrIsFavoriteTrue(@Param("shoppingDate") LocalDate shoppingDate);
 }

@@ -18,10 +18,10 @@ public class CartController {
 
     @GetMapping
     public List<Cart> getList(@RequestParam LocalDate date) {
-        // 1. 해당 날짜 데이터와 즐겨찾기 데이터를 가져옴
+        // [제발! 핵심수정] 날짜 데이터뿐만 아니라 '즐겨찾기 전체'를 가져와야 삭제 후에도 즐겨찾기 함에 남음
         List<Cart> list = repository.findAllByShoppingDateOrIsFavoriteTrue(date);
 
-        // 2. 핵심 로직: 반환하기 전, 동일한 이름을 가진 품목 중 즐겨찾기 된 게 있다면 상태 동기화
+        // 동일 이름 즐겨찾기 상태 동기화
         return list.stream().map(item -> {
             if (repository.existsByTextAndIsFavoriteTrue(item.getText())) {
                 item.setIsFavorite(true);
@@ -32,30 +32,19 @@ public class CartController {
 
     @PostMapping
     public Cart create(@RequestBody Cart item) {
-        // 추가 시에도 동일 이름의 즐겨찾기가 있다면 적용해서 저장
         if (repository.existsByTextAndIsFavoriteTrue(item.getText())) {
             item.setIsFavorite(true);
         }
         return repository.save(item);
     }
 
-    @GetMapping("/search")
-    public List<Cart> searchItems(@RequestParam String text) {
-        return repository.findByTextContaining(text);
-    }
-
     @PutMapping("/{id}")
     @Transactional
     public Cart update(@PathVariable Long id, @RequestBody Cart item) {
-        Cart target = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("항목을 찾을 수 없습니다."));
+        Cart target = repository.findById(id).orElseThrow(() -> new RuntimeException("Error"));
 
-        // 즐겨찾기 상태가 변경된 경우, DB 내의 모든 동일 명칭 품목 상태를 강제 동기화
         if (target.getIsFavorite() != item.getIsFavorite()) {
-            List<Cart> allRelated = repository.findAllByText(target.getText());
-            for (Cart c : allRelated) {
-                c.setIsFavorite(item.getIsFavorite());
-            }
+            repository.findAllByText(target.getText()).forEach(c -> c.setIsFavorite(item.getIsFavorite()));
         }
 
         target.setIsBought(item.getIsBought());
@@ -63,12 +52,21 @@ public class CartController {
         target.setText(item.getText());
         target.setCount(item.getCount());
         target.setIsFavorite(item.getIsFavorite());
-
         return repository.save(target);
     }
 
     @DeleteMapping("/{id}")
+    @Transactional
     public void delete(@PathVariable Long id) {
-        repository.deleteById(id);
+        Cart target = repository.findById(id).orElseThrow(() -> new RuntimeException("Error"));
+
+        // 즐겨찾기면 날짜만 null로 만들어서 리스트에서만 제거
+        if (target.getIsFavorite()) {
+            target.setShoppingDate(null);
+            target.setIsBought(false);
+            repository.save(target);
+        } else {
+            repository.deleteById(id);
+        }
     }
 }
