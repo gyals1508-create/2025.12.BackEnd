@@ -2,20 +2,20 @@ package com.mysite.backend.repository;
 
 import com.mysite.backend.entity.Cart;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.util.List;
 
 @Repository
 public interface CartRepository extends JpaRepository<Cart, Long> {
+    // 날짜별 조회 (즐겨찾기 섞지 않고 순수하게 그 날짜 목록만)
     List<Cart> findAllByShoppingDate(LocalDate shoppingDate);
-    List<Cart> findByTextContaining(String text);
-    boolean existsByTextAndIsFavoriteTrue(String text);
-    List<Cart> findAllByText(String text);
 
-    // [필수] 이 메서드가 있어야 컨트롤러 에러가 사라져!
-    @Query("SELECT c FROM Cart c WHERE c.shoppingDate = :shoppingDate OR c.isFavorite = true")
-    List<Cart> findAllByShoppingDateOrIsFavoriteTrue(@Param("shoppingDate") LocalDate shoppingDate);
+    // 즐겨찾기 목록만 조회 (날짜 상관없음)
+    List<Cart> findByIsFavoriteTrue();
+
+    // 검색 등 기존 메서드 유지
+    List<Cart> findByTextContaining(String text);
+    List<Cart> findAllByText(String text);
+    boolean existsByTextAndIsFavoriteTrue(String text);
 }
